@@ -1,3 +1,4 @@
 dist/
+dist_deploy/
 node_modules/
 .vs/
