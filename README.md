@@ -20,6 +20,6 @@ Place a start point (yellow cone), an end point (red cone) and optionally some o
 
 ---
 
-![Example Side Gif](https://samuel-vitorino.github.io/lightdm-simple-litarvan/side_example.gif)
+![Example Side Gif](https://samuel-vitorino.github.io/AStar3DVisualization/side_example.gif)
 
-![Example Top Gif](https://samuel-vitorino.github.io/lightdm-simple-litarvan/top_example.gif)
+![Example Top Gif](https://samuel-vitorino.github.io/AStar3DVisualization/top_example.gif)
