@@ -167,16 +167,20 @@ var restartGame = () => {
 
             squares[i][j].blocked = false;
             squares[i][j].closed = false;
-            lastGameState = undefined;
-            startSquare = undefined;
-            endSquare = undefined;
-            startButton.disabled = false;
-            endButton.disabled = false;
-            findPathButton.disabled = true;
-            gameState = 'obstacle';
-            statusTextElement.innerText = "";
+            squares[i][j].parent = undefined;
+            squares[i][j].g = undefined;
+            squares[i][j].h = undefined;
+            squares[i][j].f = undefined;
         }
     }
+    lastGameState = undefined;
+    startSquare = undefined;
+    endSquare = undefined;
+    startButton.disabled = false;
+    endButton.disabled = false;
+    findPathButton.disabled = true;
+    gameState = 'obstacle';
+    statusTextElement.innerText = "";
 }
 
 var moveCar = () => {
