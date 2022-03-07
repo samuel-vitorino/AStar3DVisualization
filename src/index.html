@@ -8,11 +8,32 @@
     <div class="ui" id="statusDiv">
         <h1 id="statusText"></h1>
     </div>
-    <button class="ui button-6" id="restartButton">Restart</button>
+    <div class="ui" id="leftControlsMenu">
+        <button class="button-6" id="restartButton">Restart</button>
+        <button class="button-6" id="settingsButton">Settings <img id="settingsIcon" style="width: 20px; height: 20px; margin-left: 10px;"></button>
+    </div>
     <div class="ui" id="controlsMenu">
         <button class="button-6" id="placeStartButton">Place Start Point</button>
         <button class="button-6" id="placeEndButton">Place End Point</button>
         <button class="button-6" id="findPathButton" disabled>Find Path</button>
+    </div>
+    <div class="ui" id="settingsMenu" style="display: none;"> 
+        <label class="input-label">Ground Size</label>
+        <div class="input-list">
+            <input type="radio" name="groundSize" id="groundSize60" checked>60</input>
+            <input type="radio" name="groundSize" id="groundSize240">240</input>
+            <input type="radio" name="groundSize" id="groundSize60">480</input>
+        </div>
+        <label class="input-label">Car Speed</label>
+        <div class="input-list">
+            <input type="radio" name="carSpeed" id="carSpeed1" checked>1</input>
+            <input type="radio" name="carSpeed" id="carSpeed2">2</input>
+            <input type="radio" name="carSpeed" id="carSpeed4">4</input>
+        </div>
+        <div style="margin-top: 20px;">
+            <button class="button-6" id="applySettingsButton">Apply</button>
+            <button class="button-6" id="closeSettingsButton">Close</button>
+        </div>
     </div>
 </body>
 </html>

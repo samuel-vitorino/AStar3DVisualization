@@ -3,7 +3,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import Square from './Square.js';
 import { calculatePath } from './AStar.js';
+import { settings, save } from './settings.js';
 import './css/style.css';
+import settingsSvg from './icons/settings.svg';
 
 import RightTexture from './clouds/right.png';
 import LeftTexture from './clouds/left.png';
@@ -16,7 +18,10 @@ import RaceCarModel from './models/Low-Poly-Racing-Car.fbx';
 import TreeModel from './models/tree.fbx';
 import ConeModel from './models/cone.fbx';
 
+document.getElementById('settingsIcon').src = settingsSvg;
+
 const loader = new FBXLoader();
+const maxSpeed = 4;
 
 var carMesh = undefined;
 var startMesh = undefined;
@@ -25,6 +30,7 @@ var obstacleMesh = undefined;
 
 var loadedModels = 0;
 
+//load tree, car and cone models
 loader.load(
     RaceCarModel,
     ( object ) => {
@@ -71,11 +77,16 @@ loader.load(
     }
 )
 
+//ui buttons
 var statusTextElement = document.getElementById("statusText");
 var findPathButton = document.getElementById("findPathButton");
 var startButton = document.getElementById("placeStartButton");
 var endButton = document.getElementById("placeEndButton");
 var restartButton = document.getElementById("restartButton");
+var settingsButton = document.getElementById("settingsButton");
+var closeSettingsButton = document.getElementById("closeSettingsButton");
+
+var settingsMenu = document.getElementById("settingsMenu");
 
 var scene = new THREE.Scene();
 var renderer = new THREE.WebGLRenderer();
@@ -91,13 +102,13 @@ var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var vec = new THREE.Vector3();
 var pos = new THREE.Vector3();
-var geo = new THREE.BoxGeometry(60, 2, 60);
+var geo = new THREE.BoxGeometry(settings.groundSize, 2, settings.groundSize);
 var material = new THREE.MeshStandardMaterial( {color: 0x2F9500} );
 var plane = new THREE.Mesh( geo, material );
 var squareX, squareY;
 
 const light = new THREE.PointLight( 0xFFFFFF, 1, 150 );
-light.position.set( 0, 100, 40 );
+light.position.set( 0, 100, settings.groundSize - 20 );
 scene.add( light );
 
 var objectToPlace;
@@ -112,9 +123,12 @@ controls.mouseButtons = {
 controls.enableKeys = false;
 controls.enablePan = false;
 
-for (var i = 0; i < 15; i++){
+//how many squares in each axis
+var numSideSquares = settings.groundSize/4;
+
+for (var i = 0; i < numSideSquares; i++){
     squares.push([]);
-    for (var j = 0; j < 15; j++){
+    for (var j = 0; j < numSideSquares; j++){
         squares[i].push(new Square(j, i));
         squares[i][j].blocked = false;
         squares[i][j].closed = false;
@@ -137,10 +151,10 @@ var texture = textureLoader.load([
   ]);
 scene.background = texture;
 
-controls.maxDistance = 67.05;
+controls.maxDistance = settings.groundSize + settings.groundSize/8.51;
 controls.minDistance = 20;
 renderer.setSize(innerWidth, innerHeight);
-camera.position.set(0, 30, 60);
+camera.position.set(0, settings.groundSize/2, settings.groundSize);
 camera.lookAt(0, 0, 0);
 scene.add(hemiLight);
 scene.add(plane); 
@@ -150,12 +164,13 @@ var lastGameState;
 
 var distanceLeft = 0;
 var axis;
-var speed = 1;
+var speed = settings.carSpeed;
 var direction = 1;
+var initialX = settings.groundSize/2 - 2;
 
 var restartGame = () => {
-    for (var i = 0; i < 15; i++){
-        for (var j = 0; j < 15; j++){
+    for (var i = 0; i < numSideSquares; i++){
+        for (var j = 0; j < numSideSquares; j++){
             if (squares[i][j].mesh && squares[i][j].mesh.parent === scene) {
                 scene.remove(squares[i][j].mesh);
                 squares[i][j].mesh = undefined;
@@ -197,13 +212,13 @@ var moveCar = () => {
             scene.remove(endSquare.mesh);
             return;
         }
-        if (path[currentDrivingSquare].x*4 - 28 != carMesh.position.x){
+        if (path[currentDrivingSquare].x*4 - initialX != carMesh.position.x){
             axis = 'x';
-            direction = path[currentDrivingSquare].x*4 - 28 - carMesh.position.x > 0 ? 1 : -1;
+            direction = path[currentDrivingSquare].x*4 - initialX - carMesh.position.x > 0 ? 1 : -1;
             carMesh.rotation.set(0, direction > 0 ? 1.5 : -1.5, 0);
         } else {
             axis = 'y';
-            direction = path[currentDrivingSquare].y*4 - 28 - carMesh.position.z > 0 ? 1 : -1;
+            direction = path[currentDrivingSquare].y*4 - initialX - carMesh.position.z > 0 ? 1 : -1;
             carMesh.rotation.set(0, direction > 0 ? 0 : -3, 0);
         }
         distanceLeft = 4; 
@@ -292,22 +307,22 @@ var showObjectPosition = (e, height, parent) => {
 
     pos.copy( camera.position ).add( vec.multiplyScalar( distance ) );
 
-    squareX = Math.floor((pos.x + 30)/4);
-    squareY = Math.floor((pos.z + 30)/4);
+    squareX = Math.floor((pos.x + settings.groundSize/2)/4);
+    squareY = Math.floor((pos.z + settings.groundSize/2)/4);
     
-    if (squareX >= 15){
-        squareX = 14;
+    if (squareX >= numSideSquares){
+        squareX = numSideSquares - 1;
     } else if (squareX <= 0){
         squareX = 0;
     }
 
-    if (squareY >= 15){
-        squareY = 14;
+    if (squareY >= numSideSquares){
+        squareY = numSideSquares - 1;
     } else if (squareY <= 0){
         squareY = 0;
     }
 
-    placePosition.set(-28 + squareX*4, height, -28 + squareY*4);
+    placePosition.set(-initialX + squareX*4, height, -initialX + squareY*4);
     objectToPlace.position.set(placePosition.x, placePosition.y, placePosition.z);
 }   
 
@@ -325,7 +340,7 @@ findPathButton.addEventListener("click", (e) => {
                 path.push(currentNode);
                 currentNode = currentNode.parent;
             }
-            carMesh.position.set(-28 + startSquare.x*4, 1.6, -28 + startSquare.y*4);
+            carMesh.position.set(-initialX + startSquare.x*4, 1.6, -initialX + startSquare.y*4);
             scene.add(carMesh);
             gameState = 'driving';
             currentDrivingSquare = path.length - 1;
@@ -353,6 +368,12 @@ endButton.addEventListener("click", (e) => {
         gameState = 'end';
     }
 );
+
+settingsButton.addEventListener("click", () => settingsMenu.style.display = '');
+
+closeSettingsButton.addEventListener("click", () => settingsMenu.style.display = 'none');
+
+settingsMenu.addEventListener("click", (e) => e.stopPropagation());
 
 animate();
 
